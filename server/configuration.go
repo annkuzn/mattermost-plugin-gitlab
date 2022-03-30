@@ -1,9 +1,15 @@
 package main
 
 import (
+	"fmt"
+	"net/url"
 	"reflect"
+	"strings"
 
+	"github.com/mattermost/mattermost-server/v6/model"
 	"github.com/pkg/errors"
+
+	"github.com/mattermost/mattermost-plugin-gitlab/server/gitlab"
 )
 
 // configuration captures the plugin's external configuration as exposed in the Mattermost server
@@ -18,6 +24,15 @@ import (
 // If you add non-reference types to your configuration struct, be sure to rewrite Clone as a deep
 // copy appropriate for your types.
 type configuration struct {
+	GitlabURL                   string
+	GitlabOAuthClientID         string
+	GitlabOAuthClientSecret     string
+	WebhookSecret               string
+	EncryptionKey               string
+	GitlabGroup                 string
+	EnablePrivateRepo           bool
+	PluginsDirectory            string
+	UsePreregisteredApplication bool
 }
 
 // Clone shallow copies the configuration. Your implementation may require a deep copy if
@@ -25,6 +40,33 @@ type configuration struct {
 func (c *configuration) Clone() *configuration {
 	var clone = *c
 	return &clone
+}
+
+// IsValid checks if all needed fields are set.
+func (c *configuration) IsValid() error {
+	if _, err := url.ParseRequestURI(c.GitlabURL); err != nil {
+		return errors.New("must have a valid GitLab URL")
+	}
+
+	if !c.UsePreregisteredApplication {
+		if c.GitlabOAuthClientID == "" {
+			return fmt.Errorf("must have a GitLab oauth client id")
+		}
+		if c.GitlabOAuthClientSecret == "" {
+			return fmt.Errorf("must have a GitLab oauth client secret")
+		}
+	}
+
+	gitLabURL := strings.TrimSuffix(c.GitlabURL, "/")
+	if c.UsePreregisteredApplication && gitLabURL != "https://gitlab.com" {
+		return errors.New("pre-registered application can only be used with official public GitLab")
+	}
+
+	if c.EncryptionKey == "" {
+		return fmt.Errorf("must have an encryption key")
+	}
+
+	return nil
 }
 
 // getConfiguration retrieves the active configuration under lock, making it safe to use
@@ -50,7 +92,7 @@ func (p *Plugin) getConfiguration() *configuration {
 // This method panics if setConfiguration is called with the existing configuration. This almost
 // certainly means that the configuration was modified without being cloned and may result in
 // an unsafe access.
-func (p *Plugin) setConfiguration(configuration *configuration) {
+func (p *Plugin) setConfiguration(configuration *configuration, serverConfiguration *model.Config) {
 	p.configurationLock.Lock()
 	defer p.configurationLock.Unlock()
 
@@ -65,6 +107,11 @@ func (p *Plugin) setConfiguration(configuration *configuration) {
 		panic("setConfiguration called with the existing configuration")
 	}
 
+	// PluginDirectory should be set based on server configuration and not the plugin configuration
+	if serverConfiguration.PluginSettings.Directory != nil {
+		configuration.PluginsDirectory = *serverConfiguration.PluginSettings.Directory
+	}
+
 	p.configuration = configuration
 }
 
@@ -77,7 +124,15 @@ func (p *Plugin) OnConfigurationChange() error {
 		return errors.Wrap(err, "failed to load plugin configuration")
 	}
 
-	p.setConfiguration(configuration)
+	serverConfiguration := p.API.GetConfig()
+
+	p.setConfiguration(configuration, serverConfiguration)
+
+	if err := configuration.IsValid(); err != nil {
+		return err
+	}
+
+	p.GitlabClient = gitlab.New(configuration.GitlabURL, configuration.GitlabGroup, p.isNamespaceAllowed)
 
 	return nil
 }
