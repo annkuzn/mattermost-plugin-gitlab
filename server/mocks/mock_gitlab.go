@@ -11,7 +11,7 @@ import (
 	gitlab0 "github.com/xanzy/go-gitlab"
 	oauth2 "golang.org/x/oauth2"
 
-	gitlab "github.com/mattermost/mattermost-plugin-gitlab/server/gitlab"
+	gitlab "github.com/annkuzn/mattermost-plugin-gitlab/server/gitlab"
 )
 
 // MockGitlab is a mock of Gitlab interface

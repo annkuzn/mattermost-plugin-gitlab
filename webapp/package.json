@@ -1,7 +1,7 @@
 {
-    "name": "mattermost_plugin",
+    "name": "gitlab",
     "version": "0.1.0",
-    "description": "Plugin for integration with GitLab",
+    "description": "GitLab plugin for Mattermost",
     "main": "src/index.js",
     "scripts": {
         "build": "webpack --mode=production --display-error-details --progress",

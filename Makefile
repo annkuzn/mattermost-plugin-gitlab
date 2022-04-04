@@ -23,7 +23,7 @@ ifneq ($(wildcard build/custom.mk),)
 endif
 
 ## Checks the code style, tests, builds and bundles the plugin.
-all: check-style test dist
+all: test dist
 
 ## Propagates plugin manifest information into the server/ and webapp/ folders as required.
 .PHONY: apply

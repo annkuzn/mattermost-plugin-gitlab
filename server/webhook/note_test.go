@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/mattermost/mattermost-plugin-gitlab/server/subscription"
+	"github.com/annkuzn/mattermost-plugin-gitlab/server/subscription"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/xanzy/go-gitlab"

@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	gitlabLib "github.com/xanzy/go-gitlab"
 
-	"github.com/mattermost/mattermost-plugin-gitlab/server/webhook"
+	"github.com/annkuzn/mattermost-plugin-gitlab/server/webhook"
 )
 
 type fakeWebhookHandler struct{}

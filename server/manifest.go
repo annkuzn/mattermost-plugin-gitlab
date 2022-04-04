@@ -7,6 +7,6 @@ var manifest = struct {
 	ID      string
 	Version string
 }{
-	ID:      "com.github.manland.mattermost-plugin-gitlab",
+	ID:      "com.github.annkuzn.mattermost-plugin-gitlab",
 	Version: "1.4.0",
 }

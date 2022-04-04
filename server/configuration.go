@@ -9,7 +9,7 @@ import (
 	"github.com/mattermost/mattermost-server/v6/model"
 	"github.com/pkg/errors"
 
-	"github.com/mattermost/mattermost-plugin-gitlab/server/gitlab"
+	"github.com/annkuzn/mattermost-plugin-gitlab/server/gitlab"
 )
 
 // configuration captures the plugin's external configuration as exposed in the Mattermost server
@@ -25,14 +25,10 @@ import (
 // copy appropriate for your types.
 type configuration struct {
 	GitlabURL                   string
-	GitlabOAuthClientID         string
-	GitlabOAuthClientSecret     string
 	WebhookSecret               string
-	EncryptionKey               string
 	GitlabGroup                 string
 	EnablePrivateRepo           bool
 	PluginsDirectory            string
-	UsePreregisteredApplication bool
 }
 
 // Clone shallow copies the configuration. Your implementation may require a deep copy if
@@ -46,24 +42,6 @@ func (c *configuration) Clone() *configuration {
 func (c *configuration) IsValid() error {
 	if _, err := url.ParseRequestURI(c.GitlabURL); err != nil {
 		return errors.New("must have a valid GitLab URL")
-	}
-
-	if !c.UsePreregisteredApplication {
-		if c.GitlabOAuthClientID == "" {
-			return fmt.Errorf("must have a GitLab oauth client id")
-		}
-		if c.GitlabOAuthClientSecret == "" {
-			return fmt.Errorf("must have a GitLab oauth client secret")
-		}
-	}
-
-	gitLabURL := strings.TrimSuffix(c.GitlabURL, "/")
-	if c.UsePreregisteredApplication && gitLabURL != "https://gitlab.com" {
-		return errors.New("pre-registered application can only be used with official public GitLab")
-	}
-
-	if c.EncryptionKey == "" {
-		return fmt.Errorf("must have an encryption key")
 	}
 
 	return nil

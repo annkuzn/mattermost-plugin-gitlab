@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/mattermost/mattermost-plugin-gitlab/server/subscription"
+	"github.com/annkuzn/mattermost-plugin-gitlab/server/subscription"
 
 	"github.com/xanzy/go-gitlab"
 )

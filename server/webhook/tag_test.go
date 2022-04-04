@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/xanzy/go-gitlab"
 
-	"github.com/mattermost/mattermost-plugin-gitlab/server/subscription"
+	"github.com/annkuzn/mattermost-plugin-gitlab/server/subscription"
 )
 
 type testDataTagStr struct {
